@@ -24,6 +24,13 @@ def main():
     output_path = PROJECT_ROOT / "data" / "processed" / "polititweets_clean.csv"
     
     df = pd.read_csv(input_path)
+    
+    # on procede a un pré-tri : on supp les retweets et garde seulement le français
+    initial_count = len(df)
+    df = df[(df["is_retweet"] != True) & (df["language"] == "fra")]
+    filtered_count = len(df)
+    
+    print(f"Pré-tri : {initial_count} tweets -> {filtered_count} tweets (supprimés: {initial_count - filtered_count})")
 
     df["clean_text"] = df["text"].apply(clean_text)
     df.to_csv(output_path, index=False)
