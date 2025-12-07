@@ -2,15 +2,18 @@ import os
 import glob
 from bs4 import BeautifulSoup
 import pandas as pd
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 def parse_tweet(post, source_file):
     p_tag = post.find("p")     # extrait des balises p
     text = p_tag.get_text().strip() if p_tag else None
     
-    tweet_id = post.get("{http://www.w3.org/XML/1998/namespace}id")
-    who = post.get("who")
+    tweet_id = post.get("xml:id") or post.get("{http://www.w3.org/XML/1998/namespace}id")
+    who = post.get("who") # Essai avec xml:id d'abord, puis avec le namespace complet
     when = post.get("when")
-    lang = post.get("{http://www.w3.org/XML/1998/namespace}lang")
+    lang = post.get("xml:lang") or post.get("{http://www.w3.org/XML/1998/namespace}lang")
     
     trailer = post.find("trailer")
     medium = None
@@ -44,8 +47,11 @@ def parse_tweet(post, source_file):
 
 def main():
     all_data = []
+    
+    raw_data_path = PROJECT_ROOT / "data" / "raw" / "polititweets" / "*.xml"
+    output_path = PROJECT_ROOT / "data" / "processed" / "polititweets_full.csv"
 
-    for xml_file in glob.glob("../../data/raw/polititweet/*.xml"):
+    for xml_file in glob.glob(str(raw_data_path)):
         if "olac-cmr" in xml_file:  # passe fichier de métadonnées
             continue
             
@@ -58,7 +64,7 @@ def main():
                 all_data.append(row)
 
     df = pd.DataFrame(all_data)
-    df.to_csv("polititweets_full.csv", index=False, encoding="utf-8")
+    df.to_csv(output_path, index=False, encoding="utf-8")
     print("extraction ok")
     print(f"{len(df)} tweets exportés.")
 
