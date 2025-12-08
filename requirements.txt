@@ -8,3 +8,5 @@ lxml
 accelerate
 protobuf
 sentencepiece
+streamlit
+plotly
