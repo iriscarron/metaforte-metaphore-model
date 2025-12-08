@@ -37,7 +37,10 @@ def main():
     
     scripts = [
         ("src/extraction/extract_polititweets.py", "Extraction des tweets depuis XML"),
-        ("src/extraction/clean_polititweets.py", "Nettoyage des données"),
+        ("src/extraction/clean_polititweets.py", "Nettoyage et pré-tri des données"),
+        ("src/training/zero_shot_metaphor_filter.py", "Détection de métaphores (modèle zero-shot)"),
+        ("src/extraction/first_tri.py", "Création de l'échantillon pour annotation"),
+        ("src/extraction/select_top_metaphors.py", "Sélection du top 200 métaphores"),
     ]
     success_count = 0
     for script_path, description in scripts:

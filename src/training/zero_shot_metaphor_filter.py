@@ -44,8 +44,8 @@ def main():
 
     os.makedirs("data/processed", exist_ok=True)
     out_path = "data/processed/polititweets_with_llm_score_sample.csv"
-    df_sample.to_csv(out_path, index=False)
-    print(f"OK → {out_path}")
+    df_sample.to_csv(out_path, index=False, encoding='utf-8-sig')
+    print(f"OK - {out_path}")
 
 if __name__ == "__main__":
     main()
