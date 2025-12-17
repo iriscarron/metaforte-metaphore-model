@@ -1,4 +1,5 @@
 from transformers import pipeline, XLMRobertaTokenizer
+import torch
 import pandas as pd
 import os
 
@@ -17,11 +18,13 @@ def main():
         "joeddav/xlm-roberta-large-xnli"
     )
     
+    device = 0 if torch.cuda.is_available() else -1
+
     classifier = pipeline(
         "zero-shot-classification",
         model="joeddav/xlm-roberta-large-xnli",
         tokenizer=tokenizer,
-        device_map="auto"  # utilisera le GPU si dispo, sinon CPU
+        device=device  # 0=GPU, -1=CPU
     )
 
     labels = ["contient une métaphore", "ne contient pas de métaphore"]
@@ -42,10 +45,27 @@ def main():
 
     df_sample["metaphor_score"] = scores
 
-    os.makedirs("data/processed", exist_ok=True)
-    out_path = "data/processed/polititweets_with_llm_score_sample.csv"
+    # Dossiers par LLM
+    llm_dir = "data/processed/llm/xlmroberta"
+    os.makedirs(llm_dir, exist_ok=True)
+
+    # CSV principal avec scores XLM-RoBERTa (nom explicite par LLM)
+    out_path = f"{llm_dir}/scores.csv"
     df_sample.to_csv(out_path, index=False, encoding='utf-8-sig')
+
+    # CSV finals: top 100 et bottom 100
+    df_sorted_desc = df_sample.sort_values("metaphor_score", ascending=False)
+    top_100 = df_sorted_desc.head(100)[["text", "metaphor_score"]]
+    bottom_100 = df_sorted_desc.tail(100).sort_values("metaphor_score", ascending=True)[["text", "metaphor_score"]]
+
+    top_out = f"{llm_dir}/top100.csv"
+    bottom_out = f"{llm_dir}/bottom100.csv"
+    top_100.to_csv(top_out, index=False, encoding='utf-8-sig')
+    bottom_100.to_csv(bottom_out, index=False, encoding='utf-8-sig')
+
     print(f"OK - {out_path}")
+    print(f"OK - {top_out}")
+    print(f"OK - {bottom_out}")
 
 if __name__ == "__main__":
     main()
