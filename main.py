@@ -38,10 +38,15 @@ def main():
     scripts = [
         ("src/extraction/extract_polititweets.py", "Extraction des tweets depuis XML"),
         ("src/extraction/clean_polititweets.py", "Nettoyage et pré-tri des données"),
-        ("src/training/zero_shot_metaphor_filter.py", "Détection de métaphores (modèle zero-shot)"),
+        ("src/training/zero_shot_metaphor_filter.py", "Détection de métaphores (XLM-RoBERTa zero-shot)"),
+        ("src/training/zero_shot_metaphor_camembert.py", "Détection de métaphores (CamemBERT zero-shot)"),
         ("src/extraction/first_tri.py", "Création de l'échantillon pour annotation"),
         ("src/extraction/select_top_metaphors.py", "Sélection du top 200 métaphores"),
     ]
+
+    # Étape d'évaluation optionnelle si un fichier d'annotations est présent
+    annotations_path = "data/annotations/annotated.csv"
+    eval_script = "src/visualization/eval_annotations.py"
     success_count = 0
     for script_path, description in scripts:
         if os.path.exists(script_path):
@@ -53,13 +58,26 @@ def main():
         else:
             print(f"\n script introuvable: {script_path}")
             break
+
+    # Évaluation si annotations disponibles
+    if success_count == len(scripts):
+        if os.path.exists(annotations_path):
+            if os.path.exists(eval_script):
+                if run_script(eval_script, "Évaluation (PR/F1) avec annotations"):
+                    success_count += 1
+            else:
+                print(f"\n script introuvable: {eval_script}")
+        else:
+            print("\nAnnotations absentes (data/annotations/annotated.csv). Étape d'évaluation ignorée.")
     
     # Résumé final
+    total_steps = len(scripts) + (1 if os.path.exists(annotations_path) else 0)
+
     print("\n" + "="*60)
-    print(f" {success_count}/{len(scripts)} étapes complétées")
+    print(f" {success_count}/{total_steps} étapes complétées")
     print("="*60)
     
-    if success_count == len(scripts):
+    if success_count == total_steps:
         print("Pipeline exécuté avec succès")
         return 0
     else:
