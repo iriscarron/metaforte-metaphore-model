@@ -44,7 +44,6 @@ def main():
         ("src/extraction/select_top_metaphors.py", "Sélection du top 200 métaphores"),
     ]
 
-    # Étape d'évaluation optionnelle si un fichier d'annotations est présent
     annotations_path = "data/annotations/annotated.csv"
     eval_script = "src/visualization/eval_annotations.py"
     success_count = 0
